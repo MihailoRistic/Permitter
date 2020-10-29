@@ -36,25 +36,30 @@ client.on("message", message => {
 client.on("voiceStateUpdate", (oldState, newState) => {
   const user = newState.member;
   let channel = null;
-  let see = null;
-  let write = null;
-  if (newState.channel == null) {
-    channel = binds.get(oldState.channel);
-    see = false;
-  } else {
-    channel = binds.get(newState.channel);
-    see = true;
+  if ((channel = binds.get(oldState.channel)) == null)
+    if ((channel = binds.get(newState.channel)) == null) {
+    } else
+      channel.updateOverwrite(user, {
+        VIEW_CHANNEL: true,
+        SEND_MESSAGES: newState.mute
+      });
+  else if (binds.get(newState.channel) == null)
+    channel.updateOverwrite(user, {
+      VIEW_CHANNEL: false,
+      SEND_MESSAGES: newState.mute
+    });
+  else {
+    if (channel == binds.get(newState.channel)) {
+    } else
+      channel.updateOverwrite(user, {
+        VIEW_CHANNEL: false,
+        SEND_MESSAGES: newState.mute
+      });
+    binds.get(newState.channel).updateOverwrite(user, {
+      VIEW_CHANNEL: true,
+      SEND_MESSAGES: newState.mute
+    });
   }
-  if (newState.mute) {
-    write = true;
-  } else {
-    write = false;
-  }
-
-  channel.updateOverwrite(user, {
-    VIEW_CHANNEL: see,
-    SEND_MESSAGES: write
-  });
 });
 
 client.login(process.env.TOKEN);
