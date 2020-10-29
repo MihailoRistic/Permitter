@@ -39,19 +39,15 @@ client.on("voiceStateUpdate", (oldState, newState) => {
   let see = null;
   let write = null;
   if (newState.channel == null) {
-    console.log("Izasao si iz vc");
     channel = binds.get(oldState.channel);
     see = false;
   } else {
-    console.log("Usao si u vc");
     channel = binds.get(newState.channel);
     see = true;
   }
   if (newState.mute) {
-    console.log("Mute se");
     write = true;
   } else {
-    console.log("Unmute se");
     write = false;
   }
 
