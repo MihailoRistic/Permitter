@@ -1,6 +1,23 @@
 const Discord = require("discord.js");
-const fs = require("fs");
+var mysql = require("mysql");
 
+var con = mysql.createConnection({
+  host: "remotemysql.com",
+  user: "dahNxUBY0g",
+  password: "E4EagKV2XR",
+  database: "dahNxUBY0g",
+  port: "3306"
+});
+con.connect(function(err) {
+  if (err) throw err;
+  console.log("MySQL connected!");
+});
+
+/*var sql = "INSERT INTO bindings (key1, value1) VALUES ('A', 'B')";
+  con.query(sql, function(err, result) {
+    if (err) throw err;
+    console.log("1 record inserted");
+  });*/
 const client = new Discord.Client();
 
 const prefix = "p!";
@@ -8,7 +25,11 @@ const prefix = "p!";
 let binds = new Map();
 
 client.once("ready", () => {
-  binds = new Map(JSON.parse(fs.readFileSync("./data.json")));
+  con.query("SELECT * FROM bindings", function(err, result, fields) {
+    if (err) throw err;
+    for (let i = 0; i < result.length; i++)
+      binds.set(result[i].key1, result[i].value1);
+  });
   console.log("Online!");
 });
 
@@ -30,9 +51,15 @@ client.on("message", message => {
       } else if (tc.type === "text") {
         message.channel.send("Uspesno spojen " + vc.name + " sa " + tc.name);
         binds.set(args[1], args[2]);
-        fs.writeFileSync(
-          "./data.json",
-          JSON.stringify(Array.from(binds.entries()))
+        con.query(
+          "INSERT INTO bindings (key1, value1) VALUES (" +
+            args[1] +
+            ", " +
+            args[2] +
+            ")",
+          function(err, result) {
+            if (err) throw err;
+          }
         );
       } else message.channel.send("TC::nije dat tc :(");
     } else message.channel.send("VC::nije dat vc :(");
@@ -44,10 +71,12 @@ client.on("message", message => {
       if (!(binds.get(args[1]) == null)) {
         message.channel.send("Uspesno oslobodjen " + vc.name);
         binds.delete(args[1]);
-        fs.writeFileSync(
-          "./data.json",
-          JSON.stringify(Array.from(binds.entries()))
-        );
+        con.query("DELETE FROM bindings WHERE key1 = " + args[1], function(
+          err,
+          result
+        ) {
+          if (err) throw err;
+        });
       } else message.channel.send("VC::nije bio bindovan :(");
     else message.channel.send("VC::nije dat vc :(");
   }
