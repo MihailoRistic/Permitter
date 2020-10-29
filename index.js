@@ -1,6 +1,6 @@
 const Discord = require("discord.js");
-var mysql = require("mysql");
 
+var mysql = require("mysql");
 var con = mysql.createConnection({
   host: "remotemysql.com",
   user: "dahNxUBY0g",
@@ -8,19 +8,17 @@ var con = mysql.createConnection({
   database: "dahNxUBY0g",
   port: "3306"
 });
+
+const client = new Discord.Client();
+const prefix = "p!";
+
 con.connect(function(err) {
   if (err) throw err;
   console.log("MySQL connected!");
 });
-
-/*var sql = "INSERT INTO bindings (key1, value1) VALUES ('A', 'B')";
-  con.query(sql, function(err, result) {
-    if (err) throw err;
-    console.log("1 record inserted");
-  });*/
-const client = new Discord.Client();
-
-const prefix = "p!";
+setInterval(function() {
+  con.query("SELECT 1");
+}, 5000);
 
 let binds = new Map();
 
